@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Spill The Tea</title>
+
+<style>
+.comment-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-height: 70vh;
+  background: white;
+  border-radius: 16px 16px 0 0;
+  transform: translateY(100%); /* pushed off-screen, downward */
+  transition: transform 0.3s ease;
+  z-index: 1001;
+  overflow-y: auto;
+}
+
+.comment-sheet.open {
+  transform: translateY(0);
+}
+
+/* dark backdrop behind it */
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: none;
+}
+
+.overlay.show {
+  display: block;
+}
+body{
+font-family:Georgia,serif;
+background:#f6f3ee;
+margin:0;
+padding:0;
+color:#3d332d;
+padding-bottom:80px;
+
+}
+
+header{
+padding:25px;
+background:#fffdfb;
+box-shadow:0px 4px 10px rgba(0,0,0,0.05);
+border-radius:0px 0px 40px 40px;
+}
+
+h1{
+margin:0;
+font-size:34px;
+text-align:center;
+}
+
+header p{
+margin-top:8px;
+text-align:center;
+color:#7b6f67;
+font-size:15px;
+}
+
+#searchContainer{
+display:flex;
+align-items:center;
+gap:10px;
+padding:15px;
+}
+
+#searchBox{
+flex:1;
+padding:14px;
+border:none;
+outline:none;
+border-radius:25px;
+background:white;
+box-shadow:0px 3px 10px rgba(0,0,0,0.08);
+font-size:15px;
+}
+.empty-notifications{
+    text-align:center;
+    padding:20px;
+}
+
+.empty-notifications .icon{
+    font-size:32px;
+    margin-bottom:10px;
+}
+
+.empty-notifications h4{
+    margin:0;
+    font-size:16px;
+}
+
+.empty-notifications p{
+    margin-top:6px;
+    color:#777;
+    font-size:13px;
+}
+#searchBtn{
+padding:14px 18px;
+border:none;
+border-radius:25px;
+background:#8b5e3c;
+color:white;
+font-size:14px;
+}
+#notifyBtn{
+padding:14px 18px;
+border:none;
+border-radius:25px;
+background:white;
+color:white;
+font-size:14px;
+}
+#categories{
+overflow-x:auto;
+white-space:nowrap;
+padding:10px 15px;
+}
+
+#categories button{
+border:none;
+background:white;
+padding:10px 16px;
+margin-right:8px;
+border-radius:20px;
+box-shadow:0px 2px 8px rgba(0,0,0,0.05);
+color:#5c4b43;
+}
+
+#feed{
+padding-bottom:100px;
+}
+
+.tea-card{
+    background: white;
+    margin: 15px auto;   /* centers horizontally */
+    padding: 18px;
+    border-radius: 24px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.06);
+
+    width: 90%;          /* responsive on mobile */
+    max-width: 650px;    /* limit size on desktop */
+
+    overflow-y: auto;
+}
+
+.post-top{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:10px;
+}
+
+.username{
+font-size:12px;
+color:#5a463d;
+}
+
+.time{
+font-size:11px;
+color:#9b8d85;
+}
+
+.post-title{
+font-size:21px;
+font-weight:bold;
+margin-top:10px;
+margin-bottom:10px;
+color:#2e2420;
+}
+
+.post-content{
+font-size:16px;
+line-height:1.5;
+color:#4e433e;
+margin-bottom:18px;
+word-wrap:break-word;
+}
+
+.tags{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:10px;
+}
+
+.tag{
+background:#f3ece7;
+padding:6px 12px;
+border-radius:15px;
+font-size:12px;
+color:#7b675d;
+}
+
+.post-actions{
+display:flex;
+gap:18px;
+margin-top:18px;
+font-size:14px;
+color:#6d5c53;
+}
+
+.post-actions button{
+border:none;
+background:none;
+font-size:14px;
+color:#6d5c53;
+}
+
+nav{
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
+justify-content:space-around;
+padding:12px 0;
+background:#fffdfb;
+box-shadow:0px -2px 10px rgba(0,0,0,0.08);
+}
+
+nav button{
+border:none;
+background:none;
+font-size:16px;
+}
+
+.main-footer{
+text-align:center;
+padding:20px;
+color:gray;
+font-size:12px;
+}
+.notification-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100%;
+  background: white;
+  transform: translateX(100%); /* pushed off-screen to the right */
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.notification-panel.open {
+  transform: translateX(0); /* slides into view */
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🍵 Spill The Tea</h1>
+<p>What's brewing today?</p>
+</header>
+
+
+<div id="searchContainer">
+
+<input
+id="searchBox"
+placeholder="@ to search for friends"
+oninput="searchTea()"
+>
+
+<button
+id="searchBtn"
+onclick="searchTea()"
+>
+Search 🔍
+</button>
+<button id="notifyBtn" onclick="notifybtn()">📫</button><div id="notification-panel" class="notification-panel"></div>
+</div>
+
+
+<div id="categories">
+
+<button onclick="alert('under development')">Local</button>
+<button onclick="alert('under development')">Hot</button>
+<button onclick="alert('under development')">Confessions</button>
+<button onclick="alert('under development')">Drama</button>
+
+</div>
+
+
+<div id="searchResults" style="display:none;"></div>
+
+<div id="feed">
+
+<div id="overlay" class="overlay"></div>
+<div id="commentSheet" class="comment-sheet">
+  <h3>Comments</h3>
+  <div id="commentList"></div>
+</div>
+
+</div>
+
+
+<nav>
+
+<button onclick="chats()">💬 Chats</button>
+
+<button onclick="tea()">🍵 Tea</button>
+
+<button onclick="PostContent()">
+➕️
+</button>
+
+<button onclick="goProfile()">
+👤 Profile
+</button>
+
+
+
+</nav>
+
+
+<script>
+const notifyBtn = document.getElementById("notifyBtn");
+const notifPanel = document.querySelector(".notification-panel");
+
+document.addEventListener("click", function(event) {
+
+    const clickedInsidePanel = notifPanel.contains(event.target);
+    const clickedButton = notifyBtn.contains(event.target);
+
+    if (!clickedInsidePanel && !clickedButton) {
+        notifPanel.classList.remove("open");
+    }
+
+});
+function notifybtn() {
+    document
+        .querySelector(".notification-panel")
+        .classList.toggle("open");
+
+    loadNotifications();
+}
+document.querySelectorAll('.commentBtn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const postId = this.dataset.postId;
+
+        document.getElementById('commentSheet').classList.add('open');
+        document.getElementById('overlay').classList.add('show');
+
+        loadComments(postId);
+    });
+});
+
+document.getElementById('overlay').addEventListener('click', function () {
+    document.getElementById('commentSheet').classList.remove('open');
+    this.classList.remove('show');
+});
+
+function loadComments(postId) {
+    fetch(`/get_comments/${postId}`)
+        .then(response => response.json())
+        .then(data => {
+            const list = document.getElementById('commentList');
+            list.innerHTML = '';
+
+            if (data.length === 0) {
+                list.innerHTML = '<p>No comments yet.</p>';
+                return;
+            }
+
+            data.forEach(comment => {
+                const div = document.createElement('div');
+                div.classList.add('comment-item');
+
+                div.innerHTML = `
+                    <strong>${comment.username}</strong>
+                    <p>${comment.comment_text}</p>
+                `;
+
+                list.appendChild(div);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading comments:', error);
+        });
+}
+async function loadNotifications() {
+
+    const response = await fetch("/notification");
+    const data = await response.json();
+
+    const panel = document.querySelector(".notification-panel");
+
+    panel.innerHTML = "";
+
+    if (data.length === 0) {
+        panel.innerHTML = `
+            <div class="tea-card empty-notifications">
+                <div class="icon">📭</div>
+                <h4>All caught up</h4>
+                <p>You have no new notifications.</p>
+            </div>
+        `;
+        return;
+    }
+
+    data.forEach(notification => {
+
+        const div = document.createElement("div");
+        div.className = "tea-card";
+        div.id = `notif-${notification.id}`;
+
+        div.innerHTML = `
+            <div class="notification">
+                <strong>@${notification.FROMSENT}</strong>
+                wants to follow you
+                <br>
+                <small>${notification.timestamp}</small>
+                <br><br>
+
+                <button onclick="acceptFollow(${notification.id})">
+                    Accept
+                </button>
+
+                <button onclick="declineFollow(${notification.id})">
+                    Decline
+                </button>
+            </div>
+        `;
+
+        panel.appendChild(div);
+    });
+}
+async function acceptFollow(notificationId) {
+
+    const response = await fetch(`/accept-follow/${notificationId}`, {
+        method: "POST"
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+        document.getElementById(`notif-${notificationId}`)?.remove();
+    }
+}
+async function declineFollow(notificationId) {
+
+    const response = await fetch(`/decline-follow/${notificationId}`, {
+        method: "POST"
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+        document.getElementById(`notif-${notificationId}`)?.remove();
+    }
+}
+function chats(){
+
+alert("Feature under devlopment");
+}
+function tea(){
+alert("Feature under devlopment");
+}
+async function PostContent(){
+
+window.location.href="/PostContent"
+
+}
+let searchTimer;
+
+document.getElementById("searchBox")
+.addEventListener("input", () => {
+
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(() => {
+        searchTea();
+    }, 300);
+
+});
+
+async function searchTea(){
+const feed = document.getElementById("feed");
+const searchResults = document.getElementById("searchResults");
+    const raw = document.getElementById("searchBox").value.trim();
+    
+    if (raw.length < 1){
+
+    searchResults.innerHTML = "";
+
+    searchResults.style.display = "none";
+
+    feed.style.display = "block";
+
+    return;
+}
+
+    if (raw.startsWith("@")) {
+        // @ mode — search users
+        const query = raw.slice(1);
+        if (query.length < 1) return;
+
+        const response = await fetch(
+    `/search?q=${encodeURIComponent(query)}&offset=0`
+);
+
+        const data = await response.json();
+
+        feed.style.display = "none";
+
+        searchResults.style.display = "block";
+
+        searchResults.innerHTML = "";
+
+        data.results.forEach(user => {
+            const div = document.createElement("div");
+            div.className = "tea-card";
+            div.style.cursor = "pointer";
+            div.innerHTML = `
+                <div class="post-top">
+                    <div class="username">@${user.username}</div>
+                </div>
+                <div class="post-title">${user.name}</div>
+            `;
+            div.onclick = () => window.location.href =
+`/otherprof/${user.username}`;
+            searchResults.appendChild(div);
+        });
+
+    } else {
+        // normal mode — search posts
+        const response = await fetch(`/search?query=${encodeURIComponent(raw)}`);
+        const data = await response.json();
+
+        document.getElementById("feed").innerHTML = "";
+
+        data.posts.forEach(post => {
+            const div = document.createElement("div");
+            div.className = "tea-card";
+            div.innerHTML = `
+                <div class="post-top">
+                    <div class="username">@${post.username}</div>
+                    <div class="time">${post.timestamp}</div>
+                </div>
+                <div class="post-title">${post.title}</div>
+                <div class="post-content">${post.content}</div>
+            `;
+            document.getElementById("feed").appendChild(div);
+        });
+    }
+}
+
+
+function goProfile(){
+window.location.href="/Profile";
+
+}
+
+
+
+let offset=0;
+let loading=false;
+let hasMorePosts = true;
+
+async function postcomment(postId) {
+    const content = document.getElementById(`post_comment_${postId}`).value;
+    
+    const res = await fetch(`/addcomment/${postId}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            content: content
+        })
+    });
+
+    console.log("Status:", res.status);
+
+    const text = await res.text();
+    console.log("Response:", text);
+}
+async function openComments(postId) {
+
+    document.getElementById('commentSheet').classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+
+    const response = await fetch(`/comments/${postId}`);
+    const data = await response.json();
+
+    const list = document.getElementById('commentList');
+    list.innerHTML = '';
+
+    if (!data.comments || data.comments.length === 0) {
+        list.innerHTML = '<p>No comments yet.</p>';
+        return;
+    }
+
+    data.comments.forEach(comment => {
+
+        const div = document.createElement('div');
+        div.className = 'comment';
+
+        div.innerHTML = `
+            <b>@${comment.username}</b><br>
+            ${comment.comment_text}
+        `;
+
+        list.appendChild(div);
+    });
+}
+async function loadPosts(){
+
+    if(loading || !hasMorePosts) return;
+
+    loading = true;
+
+    try {
+       const response = await fetch(`/posts?limit=5&offset=${offset}`);
+        const data = await response.json();
+
+       if(!data.posts || data.posts.length === 0){
+    hasMorePosts = false;
+    document.getElementById("footer").style.display = "block";
+    loading =false;
+    return;
+
+        }
+
+        data.posts.forEach(post => {
+
+    const div = document.createElement("div");
+    div.className = "tea-card";
+
+    const shortContent =
+    post.content.length > 200
+    ? post.content.substring(0,200) + "..."
+    : post.content;
+
+    div.innerHTML = `
+
+        <div class="post-top">
+            <div class="username">@${post.username}</div>
+            <div class="time">${post.timestamp}</div>
+        </div>
+
+        <div class="post-title">
+            ${post.title}
+        </div>
+
+        <div class="post-content"
+             id="content-${post.id}"
+             data-full="${encodeURIComponent(post.content)}">
+
+            ${shortContent}
+        </div>
+
+        ${
+            post.content.length > 200
+            ?
+            `<button onclick="expandPost(${post.id})">
+                Read More
+            </button>`
+            :
+            ""
+        }
+
+        <div class="post-actions">
+
+            <button onclick="likePost(${post.id})">
+                ❤️
+                <span id="likes-${post.id}">
+                    ${post.likes || 0}
+                </span>
+            </button>
+
+            <button onclick="openComments(${post.id})">
+    💬 Comments
+</button>
+        </div>
+
+        <div id="comments-${post.id}"
+             class="comments-box"
+             style="display:none;">
+        </div>
+        <input id="post_comment_${post.id}" placeholder="Write a comment...">
+<button onclick="postcomment(${post.id}); document.getElementById('post_comment_${post.id}').value = '';">
+    Post
+</button>
+    `;
+
+    document.getElementById("feed").appendChild(div);
+});
+        offset += data.posts.length;
+
+        if(data.posts.length < 5){
+            hasMorePosts = false; // LAST PAGE
+            document.getElementById("footer").style.display = "block";
+        }
+
+    } catch(error){
+        console.log(error);
+    }
+
+    loading = false;
+}
+loadPosts();
+
+function expandPost(postId){
+
+    const content =
+    document.getElementById(`content-${postId}`);
+
+    content.innerHTML =
+    decodeURIComponent(
+        content.dataset.full
+    );
+}
+async function likePost(postId){
+
+    const response =
+    await fetch(`/like/${postId}`,{
+        method:"POST"
+    });
+
+    const data =
+    await response.json();
+
+    document.getElementById(
+        `likes-${postId}`
+    ).innerText = data.likes;
+}
+async function toggleComments(postId){
+
+    const box =
+    document.getElementById(
+        `comments-${postId}`
+    );
+
+    if(box.style.display === "block"){
+        box.style.display = "none";
+        return;
+    }
+
+    box.style.display = "block";
+
+    if(box.dataset.loaded){
+        return;
+    }
+
+    box.innerHTML = "Loading comments...";
+
+    const response =
+    await fetch(`/comments/${postId}`);
+
+    const data =
+    await response.json();
+
+    box.innerHTML = "";
+
+    data.comments.forEach(comment => {
+
+        box.innerHTML += `
+            <div class="comment">
+    <b>@${comment.username}</b><br>
+    ${comment.comment_text}
+</div>
+        `;
+    });
+
+    box.dataset.loaded = true;
+}
+
+let scrollTimeout;
+
+window.addEventListener("scroll", () => {
+    clearTimeout(scrollTimeout);
+
+    scrollTimeout = setTimeout(() => {
+        if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100){
+            loadPosts();
+        }
+    }, 150);
+});
+
+</script>
+
+<div class="main-footer" id="footer" style="display:none;">
+<p>EchoNet © 2026</p>
+
+<p>
+Built for conversations, confessions and chaos.
+</p>
+
+<p>
+Contact: echonet.team@gmail.com<br><hr>
+<a href="/terms">Terms And Conditions</a>
+</p>
+
+<p>
+For bug reports, feedback or moderation queries,
+reach out anytime.
+</p>
+
+<p>
+By using EchoNet, you agree to our community
+guidelines and privacy policy.
+</p>
+
+</div>
+
+</body>
+</html>

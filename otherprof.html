@@ -1,0 +1,311 @@
+<html>
+<header>
+<title>Profile</title>
+<meta charset="UTF-8">
+
+<style>
+
+img#profileimg{
+
+width:120px;
+height:120px;
+
+object-fit:cover;
+
+border-radius:50%;
+
+box-shadow:
+0px 4px 15px rgba(0,0,0,0.08);
+
+}
+
+#tabs{
+
+overflow-x:auto;
+
+white-space:nowrap;
+
+padding:10px;
+
+}
+
+#tabs button{
+
+border:none;
+
+background:#8b5e3c;
+color:white;
+
+padding:10px 16px;
+
+margin-right:8px;
+
+border-radius:20px;
+
+box-shadow:
+0px 2px 8px rgba(0,0,0,0.05);
+
+}
+#profileCard{
+
+margin:20px;
+
+padding:20px;
+
+background:white;
+
+border-radius:20px;
+
+text-align:center;
+
+box-shadow:
+0px 4px 15px rgba(0,0,0,0.08);
+
+}
+
+#avatar{
+
+font-size:60px;
+
+}
+
+#stats{
+
+display:flex;
+
+justify-content:space-around;
+
+margin-top:20px;
+
+}
+
+#edit{
+
+margin-top:15px;
+
+padding:10px;
+
+border:none;
+
+border-radius:20px;
+
+background:#8b5e3c;
+
+color:white;
+
+}
+
+#tabs{
+
+display:flex;
+justify-content:space-around;
+margin:20px;
+
+}
+button#backbutton{
+background:white;
+border:solid 0.2px black;
+border-radius:15px;
+font-family:Georgia,serif;
+font-size:20px;
+}
+img#profileimg{
+border-radius:400px;
+box-shadow:
+0px 4px 15px rgba(0,0,0,0.08);
+}
+div.post{
+background:white;
+margin:15px;
+padding:15px;
+border-radius:20px;
+box-shadow:
+0px 4px 15px rgba(0,0,0,0.08);
+}
+div.follow_users{
+margin-top:15px;
+
+padding:10px;
+
+border:none;
+
+border-radius:20px;
+
+background:#8b5e3c;
+
+color:white;
+width:20px;
+}
+body{
+    margin:0;
+    padding:20px;
+    background:#f7f7f7;
+    font-family:Georgia,serif;
+}
+
+#profileCard{
+    max-width:500px;
+    margin:25px auto;
+    background:white;
+    border-radius:25px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+#profileimg{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    margin-bottom:15px;
+}
+
+.username{
+    color:#777;
+    margin-top:-10px;
+}
+
+.bio{
+    margin:20px 0;
+    color:#444;
+}
+
+#stats{
+    display:flex;
+    justify-content:space-evenly;
+    margin:25px 0;
+}
+
+#stats h3{
+    margin:0;
+    color:#8b5e3c;
+}
+
+#stats p{
+    margin-top:5px;
+    color:gray;
+    font-size:14px;
+}
+
+#followBtn{
+    width:180px;
+    padding:12px;
+    border:none;
+    border-radius:30px;
+    background:#8b5e3c;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+#followBtn:hover{
+    opacity:.9;
+}
+
+#tabs{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    margin-top:25px;
+}
+
+#tabs button{
+    padding:10px 22px;
+    border:none;
+    border-radius:20px;
+    background:white;
+    color:#8b5e3c;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+    cursor:pointer;
+}
+
+#tabs button:hover{
+    background:#8b5e3c;
+    color:white;
+}
+</style>
+<body>
+
+
+
+<button id="backbutton" onclick="homepage()"> ☄️
+</button>
+
+<h2>Profile</h2>
+
+</header>
+
+<div id="profileCard">
+    <img id="profileimg"
+         src="{{ url_for('static', filename='profile_pic/' + profile_pic) }}">
+
+    <h1>{{ name }}</h1>
+    <p class="username">@{{ username }}</p>
+    <p class="bio">{{ bio }}</p>
+
+    <div id="stats">
+        <div>
+            <h3>{{ tea_score }}</h3>
+            <p>Tea Score</p>
+        </div>
+
+        <div>
+            <h3>{{ followers }}</h3>
+            <p>Followers</p>
+        </div>
+
+        <div>
+            <h3>{{ following }}</h3>
+            <p>Following</p>
+        </div>
+    </div>
+
+    <button id="followbtn" onclick="follow()">
+    <span id="follow_status">
+        {% if follow_status == "pending" %}
+            Requested
+        {% elif follow_status == "accepted" %}
+            Following
+        {% else %}
+            Follow
+        {% endif %}
+    </span>
+</button>
+</div>
+
+<div id="tabs">
+
+<button>Posts</button>
+
+<button>Diaries</button>
+
+<button>Tea</button>
+
+</div>
+
+
+
+
+</body>
+
+<script>
+function homepage(){
+window.location.href="/MainPage"
+}
+async function follow() {
+    let response = await fetch("/follow_profile/{{ username }}", {
+        method: "POST"
+    });
+
+    let data = await response.json();
+    console.log(data);
+
+    if (data.status === "sent") {
+        document.getElementById("follow_status").innerText = "Requested";
+    } else {
+        alert("Failed");
+    }
+}
+</script>
+</html>

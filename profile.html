@@ -1,0 +1,378 @@
+<html>
+<header>
+<title>Profile</title>
+<meta charset="UTF-8">
+<script>
+
+
+async function loadProfile(){
+
+    try {
+
+       
+
+        
+
+        let response = await fetch("/get_profile",
+        {credentials:"include"})
+        
+
+       
+
+        let data = await response.json()
+
+        console.log("DATA:", data)
+
+        document.getElementById("name").innerText =
+        data.name
+
+        document.getElementById("username").innerText =
+        "@" + data.username
+
+        document.getElementById("bio").innerText =
+        data.bio
+
+        document.getElementById("teascore").innerText =
+        data.tea_score
+
+        document.getElementById("followers").innerText =
+        data.followers
+
+        document.getElementById("following").innerText =
+        data.following
+        document.getElementById("profileimg").src = "/static/profile_pic/" + data.profile_pic;
+        
+        console.log("PROFILE LOADED")
+
+    }
+
+    catch(err){
+
+        console.log("ERROR:", err)
+
+    }
+
+}
+
+window.onload = loadProfile
+function logout(){
+window.location.href="/logout"
+}
+
+</script>
+<style>
+
+img#profileimg{
+
+width:120px;
+height:120px;
+
+object-fit:cover;
+
+border-radius:50%;
+
+box-shadow:
+0px 4px 15px rgba(0,0,0,0.08);
+
+}
+
+#tabs{
+
+overflow-x:auto;
+
+white-space:nowrap;
+
+padding:10px;
+
+}
+
+#tabs button{
+
+border:none;
+
+background:#8b5e3c;
+color:white;
+
+padding:10px 16px;
+
+margin-right:8px;
+
+border-radius:20px;
+
+box-shadow:
+0px 2px 8px rgba(0,0,0,0.05);
+
+}
+#profileCard{
+
+margin:20px;
+
+padding:20px;
+
+background:white;
+
+border-radius:20px;
+
+text-align:center;
+
+box-shadow:
+0px 4px 15px rgba(0,0,0,0.08);
+
+}
+
+#avatar{
+
+font-size:60px;
+
+}
+
+#stats{
+
+display:flex;
+
+justify-content:space-around;
+
+margin-top:20px;
+
+}
+
+#edit{
+
+margin-top:15px;
+
+padding:10px;
+
+border:none;
+
+border-radius:20px;
+
+background:#8b5e3c;
+
+color:white;
+
+}
+
+#tabs{
+
+display:flex;
+justify-content:space-around;
+margin:20px;
+
+}
+button#backbutton{
+background:white;
+border:solid 0.2px black;
+border-radius:15px;
+font-family:Georgia,serif;
+font-size:20px;
+}
+img#profileimg{
+border-radius:400px;
+box-shadow:
+0px 4px 15px rgba(0,0,0,0.08);
+}
+div.post{
+background:white;
+margin:15px;
+padding:15px;
+border-radius:20px;
+box-shadow:
+0px 4px 15px rgba(0,0,0,0.08);
+}
+button#logout_button{
+display:flex;
+justify-content:left;
+margin:15px;
+background:#8b5e3c;
+color:white;
+}
+#uploadForm{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    margin-top:15px;
+}
+
+#profile_pic{
+    display:none;
+}
+
+#uploadLabel{
+    background:#f6efe8;
+    color:#8b5e3c;
+    padding:10px 18px;
+    border-radius:25px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.3s;
+    border:2px solid #8b5e3c;
+}
+
+#uploadLabel:hover{
+    background:#8b5e3c;
+    color:white;
+}
+
+#uploadBtn{
+    border:none;
+    background:#8b5e3c;
+    color:white;
+    padding:10px 22px;
+    border-radius:25px;
+    cursor:pointer;
+    font-size:15px;
+    transition:.3s;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+
+#uploadBtn:hover{
+    transform:translateY(-2px);
+    background:#6f492f;
+}
+#logout_button{
+    position:absolute;
+    top:20px;
+    right:20px;
+
+    background:#fff;
+    color:#8b5e3c;
+
+    border:2px solid #8b5e3c;
+    border-radius:30px;
+
+    padding:10px 20px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+    transition:.3s;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+#logout_button:hover{
+    background:#8b5e3c;
+    color:white;
+    transform:translateY(-2px);
+}
+#backbutton{
+    position:absolute;
+    top:20px;
+    left:20px;
+
+    width:45px;
+    height:45px;
+
+    border:none;
+    border-radius:50%;
+
+    background:white;
+
+    box-shadow:0 3px 10px rgba(0,0,0,.15);
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    font-size:20px;
+}
+
+#backbutton:hover{
+    background:#8b5e3c;
+    color:white;
+    transform:scale(1.08);
+}
+</style>
+<body>
+
+
+
+<button id="backbutton" onclick="homepage()"> ☄️
+</button>
+<button id="logout_button" onclick="logout()">🚪 Logout</button>
+
+
+</header>
+
+<div id="profileCard">
+
+<div id="avatar">
+    <img id="profileimg" alt="Profile Picture">
+</div>
+
+<form id="uploadForm" method="POST" action="/upload_profile_pic" enctype="multipart/form-data">
+    <input type="file" id="profile_pic" name="profile_pic" accept="image/*">
+    <label for="profile_pic" id="uploadLabel">📷 Change Photo</label>
+    <button id="uploadBtn" type="submit">Upload</button>
+</form>
+<h1 id="name"></h1>
+
+<p id="username"></p>
+
+<p id="bio">
+</p>
+
+<div id="stats">
+
+<div>
+
+<h3 id="teascore"></h3>
+
+<p>Tea Score</p>
+
+</div>
+
+<div>
+
+<h3 id="followers"></h3>
+
+<p>Followers</p>
+
+</div>
+
+<div>
+
+<h3 id="following"></h3>
+
+<p>Following</p>
+
+</div>
+
+</div>
+
+<button id="edit"onclick="update_bio()">
+
+Edit Profile
+
+</button>
+
+</div>
+
+
+<div id="tabs">
+
+<button onclick="alert('under development')">Posts</button>
+
+<button onclick="alert('under_development')">Diaries</button>
+
+<button onclick="alert('under development')">Tea</button>
+
+</div>
+
+
+
+
+</body>
+
+<script>
+function homepage(){
+window.location.href="/MainPage"
+}
+
+function update_bio(){
+window.location.href="/editbio"
+}
+</script>
+</html>

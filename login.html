@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Spill The Tea</title>
+
+<meta charset="UTF-8">
+
+<script>
+
+async function login(){
+
+    try{
+
+        let username =
+        document.getElementById(
+        "username"
+        ).value;
+
+        let password =
+        document.getElementById(
+        "password"
+        ).value;
+
+        let res = await fetch(
+        "/login",
+        {
+            method:"POST",
+            credentials:"include",
+            headers:{
+                "Content-Type":
+                "application/json"
+            },
+
+            body:JSON.stringify({
+
+                username:username,
+                password:password
+
+            })
+
+        });
+
+        if(!res.ok){
+
+            throw new Error(
+            "Server error: "
+            + res.status
+            );
+
+        }
+
+        let data =
+        await res.json();
+
+        
+
+        let errorText =
+        document.getElementById(
+        "loginError"
+        );
+
+        let passwordInput =
+        document.getElementById(
+        "password"
+        );
+
+        errorText.innerText = "";
+
+        passwordInput.classList.remove(
+        "error"
+        );
+
+        if(
+        data.status ===
+        "Login_Success"
+        ){
+
+          
+
+            window.location.href =
+            "/MainPage";
+
+        }
+
+        else if(
+        data.status ===
+        "Wrong_Password"
+        ){
+
+            errorText.innerText =
+            "Wrong password.";
+
+            passwordInput.classList.add(
+            "error"
+            );
+
+        }
+
+        else if(
+        data.status ===
+        "USER_NOT_FOUND"
+        ){
+
+            errorText.innerText =
+            "Username not found.";
+
+            passwordInput.classList.add(
+            "error"
+            );
+
+        }
+
+    }
+
+    catch(err){
+
+        console.error(
+        "Login error:",
+        err
+        );
+
+        alert(
+        "Something went wrong."
+        );
+
+    }
+
+}
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // Prevent form submission
+        login();
+    }
+});
+</script>
+
+<style>
+
+body{
+
+    font-family:Georgia,serif;
+
+    margin:0;
+
+    min-height:100vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+    background:#f6f3ee;
+
+}
+
+#card{
+
+    width:280px;
+
+    margin:auto;
+
+    margin-top:110px;
+
+    padding:25px;
+
+    text-align:center;
+
+    background:#fffdfb;
+
+    border-radius:20px;
+
+    box-shadow:
+    0px 4px 15px rgba(0,0,0,0.08);
+
+}
+
+h1{
+
+    margin-top:0;
+
+}
+
+label{
+
+    display:block;
+
+    text-align:left;
+
+    margin-top:12px;
+
+    margin-left:5px;
+
+}
+
+.input-group{
+
+    width:100%;
+
+    margin-top:10px;
+
+}
+
+.text-input{
+
+    width:100%;
+
+    padding:12px;
+
+    border:none;
+
+    outline:none;
+
+    border-radius:20px;
+
+    background:white;
+
+    box-shadow:
+    0px 2px 8px rgba(0,0,0,0.08);
+
+    font-size:16px;
+
+    box-sizing:border-box;
+
+}
+
+.text-input.error{
+
+    border:1px solid #c94b4b;
+
+}
+
+.error-text{
+
+    min-height:16px;
+
+    margin-top:6px;
+
+    margin-left:10px;
+
+    text-align:left;
+
+    font-size:13px;
+
+    color:#c94b4b;
+
+    font-family:Arial,sans-serif;
+
+}
+#card{
+    animation:fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+button{
+
+    width:100%;
+
+    margin-top:15px;
+
+    padding:10px;
+
+    font-size:16px;
+
+    border:none;
+
+    border-radius:40px;
+
+    background:#8b5e3c;
+
+    color:white;
+
+    box-shadow:
+    0px -2px 10px rgba(0,0,0,0.08);
+
+}
+
+button:active{
+
+    transform:scale(0.98);
+
+}
+
+a{
+
+    display:block;
+
+    margin-top:15px;
+
+    text-decoration:none;
+
+    color:black;
+
+}
+
+.main-footer{
+
+    margin-top:auto;
+
+    text-align:center;
+
+    padding:20px;
+
+    color:gray;
+
+    font-size:12px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="card">
+
+<h1>
+Spill The Tea
+</h1>
+
+<hr>
+
+<label>
+Username
+</label>
+
+<div class="input-group">
+
+<input
+class="text-input"
+id="username"
+name="username"
+type="text"
+placeholder="Enter your username"
+oninput="this.value=this.value.toLowerCase()"
+required
+>
+
+</div>
+
+<label>
+Password
+</label>
+
+<div class="input-group">
+
+<input
+class="text-input"
+id="password"
+name="password"
+type="password"
+placeholder="Enter your password"
+required
+>
+
+<p
+class="error-text"
+id="loginError"
+></p>
+
+</div>
+
+<button
+type="button"
+onclick="login()"
+>
+
+Login
+
+</button>
+
+<a href="/signup">
+
+Don't have an account?
+
+</a>
+
+</div>
+
+<div class="main-footer">
+
+<p>
+EchoNet © 2026
+</p>
+
+<p>
+Built for conversations, confessions and chaos.
+</p>
+
+<p>
+Contact: echonet.team@gmail.com<br><hr>
+<a href="/terms">Terms And Condtions</a>
+</p>
+
+<p>
+For bug reports, feedback or moderation queries,
+reach out anytime.
+</p>
+
+<p>
+By using EchoNet, you agree to our community
+guidelines and privacy policy.
+</p>
+
+</div>
+
+</body>
+
+</html>

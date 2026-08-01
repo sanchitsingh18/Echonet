@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>EchoNet</title>
+<script>
+function showToast(message){
+
+let toast =
+document.getElementById("toast");
+
+toast.innerText = message;
+
+toast.style.opacity = "1";
+
+setTimeout(()=>{
+
+toast.style.opacity = "0";
+
+},2000);
+
+}
+
+
+
+async function signup() {
+    try {
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let email = document.getElementById("email").value;
+        let confirmpassword=document.getElementById("confirmpassword").value;
+        let name=document.getElementById("name").value;
+        let agreement=document.getElementById("terms").checked;
+        
+        if (password!==confirmpassword){
+        alert("password dont match!");
+        return;
+        }
+        let res = await fetch("/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name:name,
+                username: username,
+                password: password,
+                email:email,
+                agreement:agreement
+            })
+        });
+
+        //  check HTTP status first
+        
+        if (!res.ok) {
+            throw new Error("Server error: " + res.status);
+        }
+
+        let data = await res.json();
+
+        console.log("Server response:", data);
+        if (data.status==="USERNAME_EXISTS"){
+        document.getElementById("usernameError").innerText="Username Already Taken"
+        return;}
+        if (data.status==="EMAIL_EXISTS"){
+        document.getElementById("emailError").innerText="Email already registered with database"
+        return;
+        }
+        else{
+        document.getElementById("usernameError").innerText=""
+        }
+        
+        if (data.status === "SIGNUP_SUCCESS") {
+            showToast("Account Created")
+            window.location.href="/verify";
+        } else {
+            showToast("Ig An Error")
+        }
+
+    } catch (err) {
+        console.error("SIGNUP Error:", err);
+        alert("Something went wrong. Check console.");
+    }
+}
+
+
+</script>
+ 
+<style> 
+h1{
+    font-size:32px;
+    line-height:1.1;
+    margin-bottom:20px;
+    
+    margin:0 0 20px 0;
+}
+#toast{
+    position:fixed;
+    bottom:90px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#333;
+    color:white;
+    padding:12px 20px;
+    border-radius:30px;
+    opacity:0;
+    transition:0.3s;
+    z-index:1000;
+}
+
+body{
+    font-family:Georgia, serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    min-height:100vh;
+    margin:0;
+    padding-top:40px;
+padding-bottom:40px;
+    background:#f6f3ee;
+}
+
+#card{
+    
+    max-width:90vw;
+    padding:25px;
+    border:1px solid #ddd;
+    border-radius:20px;
+    background:#fffdfb;
+    box-shadow:0px 4px 15px rgba(0,0,0,0.08);
+    text-align:center;
+    width:360px;
+max-width:92vw;
+}
+
+label{
+    display:block;
+    padding-top:12px;
+    text-align:left;
+    font-size:15px;
+}
+.text-input{
+    font-family: Arial, sans-serif;
+}
+input:not([type="checkbox"]){
+    width:100%;
+    box-sizing:border-box;
+    margin:5px;
+}
+
+.text-input{
+    width:100%;
+    padding:12px;
+    border:none;
+    outline:none;
+    border-radius:14px;
+    background:white;
+    box-shadow:0px 2px 8px rgba(0,0,0,0.08);
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+.text-input:focus{
+    box-shadow:
+    0px 2px 8px rgba(0,0,0,0.08),
+    0px 0px 0px 3px rgba(139,94,60,0.15);
+}
+
+.text-input.error{
+    border:1px solid #c94b4b;
+}
+
+.error-text{
+    display:none;
+}
+.error-text:not(:empty){
+    display:block;
+    margin-top:6px;
+    color:#c94b4b;
+    font-size:13px;
+}
+#card{
+    animation:fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+#termsBox{
+    margin:15px 0;
+    font-size:14px;
+    color:#5e5149;
+    text-align:left;
+   
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+
+}
+
+#terms{
+    width:auto;
+    margin-right:8px;
+}
+
+button{
+    font-family:Georgia, serif;
+    width:100%;
+    margin-top:15px;
+    padding:10px;
+    font-size:16px;
+    background:#8b5e3c;
+    color:white;
+    border:none;
+    border-radius:40px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.12);
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:active{
+    transform:scale(0.98);
+}
+
+a#terms{
+    display:block;
+}
+
+input#terms{
+    margin-top:10px;
+    width:20px;
+    height:20px;
+}
+</style>
+</head>
+<body>
+<div id="card">
+<h1>EchoNet<br>Create account for you</h1>
+<hr>
+
+<label>Your Name:</label>
+<input
+class="text-input"
+  type="text" id="name" placeholder="You got a name ryt?" required>
+
+<label>Choose a username:</label>
+
+<input class="text-input" id="username" type="text" placeholder="choose a username" required oninput="this.value=this.value.toLowerCase()">
+<p
+class="error-text"
+id="usernameError"
+></p>
+<label >
+Create a strong password:
+</label>
+<input
+class="text-input"
+  id="password" type="password" placeholder="Enter your password" required>
+<label>
+Confirm password:
+</label>
+<input
+class="text-input"
+  id="confirmpassword" type="password" placeholder="Confirm your password" required>
+
+<label>
+Whatz your email:
+</label>
+<input class="text-input" id="email" type="email" placeholder="email is your what??" required>
+<p
+class="error-text"
+id="emailError"
+></p>
+
+<div id="termsBox">
+
+<input
+type="checkbox"
+id="terms"
+required
+>
+<div id="toast"></div>
+<label for="terms">
+
+I agree to the <a href="/terms">Terms & Conditions</a>
+and Community Guidelines
+
+</label>
+
+</div>
+
+<button onclick="signup()">
+SignUp ;)
+</button>
+</div>
+
+</body>
+        
+</html>    

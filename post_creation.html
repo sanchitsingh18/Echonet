@@ -1,0 +1,328 @@
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<header>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Georgia, serif;
+    background:#f6f3ee;
+    color:#3d332d;
+    min-height:100vh;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:25px;
+    font-size:38px;
+}
+
+#BackButton{
+    border:none;
+    background:white;
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    cursor:pointer;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+    margin-bottom:20px;
+}
+
+.tea-card{
+    max-width:650px;
+    margin:auto;
+    background:white;
+    border-radius:28px;
+    padding:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.tea-card h2{
+    margin-bottom:20px;
+    font-size:24px;
+}
+.main-footer{
+    margin-top:40px;
+    padding:30px 25px;
+    background:#fffdfb;
+    border-radius:30px 30px 0 0;
+    text-align:center;
+
+    box-shadow:
+    0 -4px 20px rgba(0,0,0,.05);
+
+    color:#6d6057;
+
+    font-family:Georgia, serif;
+}
+
+.main-footer p{
+    margin:12px 0;
+    line-height:1.6;
+    font-size:14px;
+}
+
+.main-footer p:first-child{
+    font-size:18px;
+    font-weight:bold;
+    color:#3d332d;
+}
+
+.main-footer hr{
+    width:60%;
+    margin:18px auto;
+    border:none;
+    border-top:1px solid #e8ddd3;
+}
+
+.main-footer a{
+    color:#8b5e3c;
+    text-decoration:none;
+    font-weight:bold;
+    transition:.2s;
+}
+
+.main-footer a:hover{
+    opacity:.7;
+    text-decoration:underline;
+}
+input,
+textarea{
+    width:100%;
+    border:none;
+    outline:none;
+    background:#faf8f5;
+    border-radius:18px;
+    padding:15px;
+    margin-bottom:15px;
+    font-size:16px;
+    font-family:Georgia, serif;
+    transition:.2s;
+}
+
+input:focus,
+textarea:focus{
+    background:white;
+    box-shadow:0 0 0 3px rgba(139,94,60,.15);
+}
+
+#caption{
+    font-size:20px;
+    font-weight:bold;
+}
+
+#content{
+    min-height:220px;
+    resize:none;
+    line-height:1.6;
+}
+
+.tags{
+    display:flex;
+    gap:10px;
+}
+
+.tags input{
+    margin-bottom:0;
+}
+
+#post{
+    margin-top:20px;
+    width:100%;
+    border:none;
+    border-radius:18px;
+    padding:15px;
+    cursor:pointer;
+    font-size:17px;
+    font-weight:bold;
+    color:white;
+    background:#8b5e3c;
+    box-shadow:0 6px 18px rgba(139,94,60,.3);
+    transition:.2s;
+}
+
+#post:hover{
+    transform:translateY(-2px);
+}
+
+#toast{
+    position:fixed;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#333;
+    color:white;
+    padding:12px 20px;
+    border-radius:30px;
+    opacity:0;
+    transition:.3s;
+}
+</style>
+<title>
+Draft
+</title>
+<h1>🍵 Spill The Tea</h1>
+
+<button id="BackButton" onclick="BackScreen()">✕</button>
+
+<div class="tea-card">
+
+    <h2>New Draft</h2>
+
+    <input
+        id="caption"
+        type="text"
+        placeholder="✨ Here goes the caption..."
+    >
+
+    <textarea
+        id="content"
+        placeholder="☕ What's the tea today? Spill everything here..."
+    ></textarea>
+
+    <div class="tags">
+        <input type="text" id="tag1" placeholder="#tags">
+        <input type="text" id="tag2" placeholder="#examples">
+        <input type="text" id="tag3" placeholder="#secret">
+    </div>
+
+    <button id="post" onclick="Post()">
+        Spill It ☕
+    </button>
+
+</div>
+
+<div id="toast"></div>
+
+</div>
+
+</body>
+<script>
+
+function showToast(message){
+
+let toast =
+document.getElementById("toast");
+
+toast.innerText = message;
+
+toast.style.opacity = "1";
+
+setTimeout(()=>{
+
+toast.style.opacity = "0";
+
+},2000);
+
+}
+
+
+
+function BackScreen(){
+window.location.href="/MainPage"
+}
+async function Post(){
+
+try{
+
+let title=document.getElementById("caption").value;
+
+let content=document.getElementById("content").value;
+
+let tag1=document.getElementById("tag1").value;
+
+let tag3=document.getElementById("tag3").value;
+let tag2=document.getElementById("tag2").value;
+let username = localStorage.getItem("username");
+
+let res=await fetch(
+"/Post_Content",
+{
+method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+username:username,
+title:title,
+content:content,
+tag1:tag1,
+tag2:tag2,
+tag3:tag3
+})
+
+}
+);
+
+if(!res.ok){
+throw new Error(
+"Server error: "
++res.status
+);
+
+}
+
+let data=
+await res.json();
+
+console.log(
+"Server response:",
+data
+);
+
+
+if(
+data.status==="POST_CREATED"
+){
+showToast("Succesfully Posted")
+window.location.href=
+"/MainPage";
+}
+else{
+showToast("Posting Error")
+}
+}
+catch(err){
+console.error(
+"POSTING Error:",
+err
+);
+alert(
+"Something went wrong. Check console."
+);
+
+}
+
+}
+
+</script>
+<div class="main-footer">
+<p>EchoNet © 2026</p>
+
+<p>
+Built for conversations, confessions and chaos.
+</p>
+
+<p>
+Contact: echonet.team@gmail.com<br><hr>
+<a href="/terms"> Terms And Condition </a> 
+</p>
+
+<p>
+For bug reports, feedback or moderation queries,
+reach out anytime.
+</p>
+
+<p>
+By using EchoNet, you agree to our community
+guidelines and privacy policy.
+</p>
+
+</div>
+</html>

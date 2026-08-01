@@ -1,0 +1,212 @@
+<html>
+<head>
+<title>Edit Bio
+</title>
+<style>
+p{
+text-align:left;
+padding-top:2px;
+}
+input{
+display:inline;
+border-radius:15px;
+height:40px;
+width:100%;
+margin-top:5px;
+padding-left:5px; 
+}
+body{
+  font-family:Georgia, serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    min-height:100vh;
+    margin:0;
+    padding-top:40px;
+padding-bottom:40px;
+    
+background:#f6f3ee;}
+.card{
+max-width:90vw;
+    padding:25px;
+    border:1px solid #ddd;
+    border-radius:20px;
+    background:#fffdfb;
+    box-shadow:0px 4px 15px rgba(0,0,0,0.08);
+    text-align:center;
+    width:360px;
+max-width:92vw;
+}
+span{
+ display:block;
+    padding-top:12px;
+    text-align:left;
+    font-size:15px;
+   
+}
+.card{
+    animation:fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+button{
+    animation:fade-up 0.49s ease;
+    font-family:Georgia, serif;
+    width:100%;
+    margin-top:15px;
+    padding:10px;
+    font-size:16px;
+    background:#8b5e3c;
+    color:white;
+    border:none;
+    border-radius:40px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.12);
+    cursor:pointer;
+    transition:0.2s;
+}
+
+@keyframes fade-up{
+    from{
+        opacity:0;
+        transform:translateX(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateX(0);
+    }
+}
+button:active{
+    transform:scale(0.98);
+}
+.error-text{
+    display:none;
+}
+.error-text:not(:empty){
+    display:block;
+    margin-top:6px;
+    color:#c94b4b;
+    font-size:13px;
+}
+</style>
+</head>
+<body>
+<div class="card">
+
+<h2 id="heading">Edit Your Bio</h2>
+
+<span for="usernamee">Change Your Username</span>
+<input type="text" id="username"  placeholder="Choose a new username" >
+
+<p class="error-text" id="UsernameError"></p>
+<span for="bioo">Change Your Bio</span>
+<input type="text" id="bio" placeholder="choose a new bio">
+<span for="namee" >Change Your Name</span>
+<input type="text" id="name" placeholder="wanna change your name">
+<button onclick="update_bio()"> Update Bio</button>
+</div>
+</body>
+<script>
+
+ const input = document.getElementById("username");
+ console.log("Input",input)
+async function update_bio(){
+const username=document.getElementById("username").value;
+const bio = document.getElementById("bio").value;
+const name = document.getElementById("name").value;
+let res = await fetch("/update_bio", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                bio:bio,
+                name:name
+            })
+        });
+        if (!res.ok) {
+            throw new Error("Server error: " + res.status);
+        }
+
+        let data = await res.json();
+        if (data.status==="BIO_UPDATED"){
+        
+        window.location.href="/MainPage"
+        }
+        else{
+       alert("An unexpected error occured")
+        } 
+}
+let debounceTimer;
+//watches over input typed
+  input.addEventListener("input", () => {
+     clearTimeout(debounceTimer);
+   
+const query = input.value;
+    if (query.length < 1) {
+    document.getElementById("UsernameError").innerText = "";
+      return;
+    }
+
+    // Debounce — wait 300ms after user stops typing
+    debounceTimer = setTimeout(() => {
+      checkusername(query);
+    }, 300);
+  });
+
+window.addEventListener("load", datafetch);
+
+async function datafetch(){
+try{
+
+let response = await fetch("/get_profile")        
+if(!response.ok){
+    throw new Error("Failed to load profile");
+}
+let data = await response.json()
+document.getElementById("username").value=data.username;
+document.getElementById("bio").value=data.bio;
+document.getElementById("name").value=data.name;
+}
+
+catch(err){
+
+        console.log("ERROR:", err)
+
+    }
+}
+async function checkusername(username){
+
+let res = await fetch("/check_username", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username
+            })
+        });
+        if (!res.ok) {
+            throw new Error("Server error: " + res.status);
+        }
+
+        let data = await res.json();
+        if (data.status==="USERNAME_EXIST"){
+        document.getElementById("UsernameError").innerText="Username Already Taken";
+        return;
+        }
+        else{
+        document.getElementById("UsernameError").innerText="";
+        } 
+}
+</script>
+</html>
